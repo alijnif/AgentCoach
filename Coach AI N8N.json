@@ -1,0 +1,334 @@
+{
+  "name": "Gym sessions",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=## Role\nTu es un coach sportif personnel specialiste dans le gain de muscle et de poid pour les personnes ayant un métabolisme ectomorphe.\n\n\n## Outil\ntu as accès à mes sessions de sport historique depuis trois fichiers Get_Workout_23 , Get_Workout_24 et Get_Workout_25 dans chacun tu trouveras des données spécifiques à une année . Pour Get_Workout_23 c'est 2023 pour Get_Workout_24 c'est 2024 Get_Workout_25 c'est 2025\n\n## Objectif\nEn janvier 2025 mon poid était de 84 kilo, avec un taux de griasse corporelle à 10.9% avec un IMC à 23. Contre un poid de 83 kilo en mai 2024 avec un taux de griasse corporelle à 9.2%. Ma masse musculaire est la même depuis 2 ans c'est à dire à 43.4 kilos.\n\nJe souhaite que tu m'informes sur mes meilleurs séances , celle qui maident à muscler la partie de mon corps visé. Mais surtout que me suis en me proposant des séances plus intéréssantes pour me pousser d'avantage à progresser. Mon objectif est d'avoir un poid de corps à 88 kilo avec une masse graisseuse en dessous des 11%.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "731c5481-9317-4a41-ad49-863233c10432",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 2048,
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        240
+      ],
+      "id": "0c9fa7b2-100b-4934-8374-dc10574ff1e9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4zSAWaSDFeBaftMl",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        0
+      ],
+      "id": "aec250ee-d8d3-4312-b6c7-5b621a6da6ce",
+      "name": "Telegram Trigger",
+      "webhookId": "7210dc2e-3257-4bf5-9959-74d7b8dd3d72",
+      "credentials": {
+        "telegramApi": {
+          "id": "Z0dmJCvJIXJPzkw8",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        340,
+        200
+      ],
+      "id": "0090da94-a9d7-4d7d-b04a-3f2190145eea",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "1f7f8fd2-577e-4618-a2a9-c5400f57230f",
+      "name": "Send a text message",
+      "webhookId": "cb4c7e1a-0669-4a72-b555-ede5b3f22ba1",
+      "credentials": {
+        "telegramApi": {
+          "id": "Z0dmJCvJIXJPzkw8",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "maxOutputTokens": 20048,
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        40,
+        240
+      ],
+      "id": "f7495b2f-5c74-4d3b-ad65-1ff129878b25",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6Cqi8y6rXPHiBh3c",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1aXGr47zc2mu4gc2Y9ASwGbcVUKMWoOJGWwvJ6EjYHcc",
+          "mode": "list",
+          "cachedResultName": "N8N Workout",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aXGr47zc2mu4gc2Y9ASwGbcVUKMWoOJGWwvJ6EjYHcc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607236348,
+          "mode": "list",
+          "cachedResultName": "Workouts overall",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aXGr47zc2mu4gc2Y9ASwGbcVUKMWoOJGWwvJ6EjYHcc/edit#gid=607236348"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        380,
+        360
+      ],
+      "id": "3511116a-7e54-4c74-bef8-817119fa197f",
+      "name": "Get_Workout_23",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "imNCpjAU5BokL23p",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1IJ6s8o15PNHr5XxFG7Dvg6wta5CVOYjRqEBhlLqNiG4/edit?tab=t.0",
+        "simple": "={{ $fromAI('Simplify', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        520,
+        380
+      ],
+      "id": "fff673dd-d299-4ec8-afd7-51b4402d71f2",
+      "name": "Get_Workout_24",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "QnzQ4MYcgdDpH6NB",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "1WWcOe61EsX_4GWBciYiogZmumCX5mBMecay6SvZLe98"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        620,
+        220
+      ],
+      "id": "b450de83-1731-4da0-aafd-a678150fbd96",
+      "name": "Get_Workout_25",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "QnzQ4MYcgdDpH6NB",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 571035892,
+          "message": {
+            "message_id": 37,
+            "from": {
+              "id": 1994833683,
+              "is_bot": false,
+              "first_name": "Dali",
+              "last_name": "Jnifen",
+              "username": "med_ali_j",
+              "language_code": "fr"
+            },
+            "chat": {
+              "id": 1994833683,
+              "first_name": "Dali",
+              "last_name": "Jnifen",
+              "username": "med_ali_j",
+              "type": "private"
+            },
+            "date": 1752681153,
+            "text": "Quels sont mes meilleurs séances de pectoraux en 2023 et 2024."
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Workout_23": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Workout_24": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Workout_25": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2325e0f2-2370-4e13-a8d2-9f39b59a3846",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2ed32bac6b09df11601e9d50b13b20bf934ddf3c9364ee8422d9bf6ab0fc1125"
+  },
+  "id": "JxsAPdcEL146ZLyJ",
+  "tags": []
+}
